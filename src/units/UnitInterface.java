@@ -7,7 +7,7 @@ import com.aisandbox.util.FacingDirection;
 import com.aisandbox.util.Vector2;
 
 /**
- * Provides the interface that all classes that override Unit class should adhere to.
+ * Provides the interface that all classes that override the Unit class should adhere to.
  * @author Todd Davies <todd434@gmail.com>
  *
  */
