@@ -16,13 +16,13 @@ public class CornerAnalysis {
 	 * @param area the map (where 0 is a space, 1 is a small wall and 2 is a big wall)
 	 * @return an ArrayList of Corners
 	 */
-	public static ArrayList<Corner> findCorners(int[][] area) {
+	public static ArrayList<Corner> findCorners(int[][] area, boolean countEdges) {
 		ArrayList<Corner> corners = new ArrayList<Corner>();
 		for (int i = 0; i < area.length; i++) { // each row
 			for (int j = 0; j < area[i].length; j++) { // each column
 				if (area[i][j] == 0) { // it's not a wall - lets test to see if
 										// it's a corner
-					if (CornerAnalysis.isCorner(area, i, j, true)) {
+					if (CornerAnalysis.isCorner(area, i, j, countEdges)) {
 						Corner c = new Corner(new Vector2(i, j), new Vector2());
 						if(isDeepCorner(area, c)) { c.setDeep(true); }
 						corners.add(c);
@@ -65,7 +65,7 @@ public class CornerAnalysis {
 				{ x, y - 1 },// Down 1
 				{ x, y + 1 } };// Up 1
 		int walls = 0; // Create a variable to store how many walls are next to
-						// the current space
+					   // the current space
 		for (int[] coords : around) {// test each adjacent space
 			if ((coords[1] < 0) || (coords[0] >= area.length)
 					|| (coords[0] < 0) || (coords[1] >= area[x].length)) {
@@ -79,13 +79,48 @@ public class CornerAnalysis {
 			}
 		}
 		if (walls == 2 || walls == 3) { // if the block is surrounded by 2 or 3
-										// walls, it's a corner			
+										// walls, it's a corner 
+			
+			//Check to see if this wall is just a corridor
+			if( (isCorridor(area, around[0][0],around[0][1], around[1][0], around[1][1])) && 
+					(!isCorridor(area, around[2][0],around[2][1], around[3][0], around[3][1]))) {
+				return false;
+			}
+			if( (!isCorridor(area, around[0][0],around[0][1], around[1][0], around[1][1])) && 
+					(isCorridor(area, around[2][0],around[2][1], around[3][0], around[3][1]))) {
+				return false;
+			}
+			
 			return true;
 		} else {
 			return false;
 		}
 	}
 	
+	/**
+	 * Are these two points spaces?
+	 */
+	private static boolean isCorridor(int[][] area, int x, int y, int x2, int y2) {
+		boolean one = false;
+		boolean two = false;
+		if ((y < 0) || (x >= area.length) || (x < 0) || (y >= area[x].length)) {
+			one = true;
+		} else {
+			one = (area[x][y] >= 1);
+		}
+		if ((y2 < 0) || (x2 >= area.length) || (x2 < 0) || (y2 >= area[x2].length)) {
+			two = true;
+		} else {
+			two = (area[x2][y2] >= 1);
+		}
+		if(!one && !two) {
+			return true;
+		} else {
+			return false;
+		}
+		
+	}
+
 	/**
 	 * Is the wall facing in that direction?
 	 * @param area the map
@@ -109,6 +144,8 @@ public class CornerAnalysis {
 	 */
 	public static boolean isCornerPointingInDirectionOf(int[][] area, Corner corner, Vector2 direction) {
 		Vector2 orientation = getCornerOrientation(area, corner);
+		/*boolean toReturn = ((direction.x==orientation.x) && (direction.y==orientation.y));
+		return (toReturn);*/
 		boolean x = false;
 		boolean y = false;
 		if (orientation.x > 0) {
@@ -169,18 +206,18 @@ public class CornerAnalysis {
 						area[(int) cornerLocation.x + 1][(int) cornerLocation.y + 1] } };
 		Vector2 orientation = new Vector2(0, 0);
 		if (around[0][1] >= 1 && around[2][1] == 0) {
-			orientation.y = 1;
+			orientation.x = 1;
 		} else {
 			if (around[0][1] == 0 && around[2][1] >= 1) {
-				orientation.y = -1;
+				orientation.x = -1;
 			}
 		}
 
 		if (around[1][0] == 0 && around[1][2] >= 1) {
-			orientation.x = -1;
+			orientation.y = -1;
 		} else {
 			if (around[1][0] >= 1 && around[1][2] == 0) {
-				orientation.x = 1;
+				orientation.y = 1;
 			}
 		}
 		return orientation;

@@ -57,7 +57,7 @@ public class MyCommander extends SandboxCommander
 		System.out.print("Starting map analysis...\n");
 		System.out.print("DEFENCE ANALYSIS\n");
 		System.out.print(" - Finding corners to defend from...\n");
-		corners = CornerAnalysis.findCorners(levelInfo.getBlockHeights());
+		corners = CornerAnalysis.findCorners(levelInfo.getBlockHeights(), false);
 		System.out.print(" - " + corners.size() + " corners found\n");
 		System.out.print("Finished map analysis...\n");
 	}

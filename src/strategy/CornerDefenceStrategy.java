@@ -13,18 +13,36 @@ import analysis.CornerSorter;
 import com.aisandbox.util.Vector2;
 import commander.MyCommander;
 
+/**
+ * A strategy that defends a location of the map by placing bots in corners around that point to defend it
+ * @author Todd Davies <todd434@gmail.com>
+ *
+ */
 public class CornerDefenceStrategy extends Strategy {
 
 	private Vector2 defendingPosition;
 	private ArrayList<Corner> suitableCorners;
 	private HashMap<String, Corner> occupiedCorners;
 	
+	/**
+	 * CornerDefenceStrategy constructor
+	 * @param commander the commmander that this strategy belongs to
+	 * @param location the location to defend
+	 * @param verbose whether the strategy should print what it's doing to the log
+	 */
 	public CornerDefenceStrategy(MyCommander commander, Vector2 location, boolean verbose) {
 		super(commander, verbose);
 		occupiedCorners = new HashMap<String, Corner>();
 		setDefenceLocation(location);
 	}
 	
+	/**
+	 * CornerDefenceStrategy constructor
+	 * @param commander the commmander that this strategy belongs to
+	 * @param location the location to defend
+	 * @param verbose whether the strategy should print what it's doing to the log
+	 * @param numberOfUnits the maximum number of units the strategy should accept (may change)
+	 */
 	public CornerDefenceStrategy(MyCommander commander, Vector2 location, boolean verbose, int numberOfUnits) {
 		super(commander, verbose);
 		occupiedCorners = new HashMap<String, Corner>();
@@ -32,6 +50,10 @@ public class CornerDefenceStrategy extends Strategy {
 		setDefenceLocation(location);
 	}
 	
+	/**
+	 * Sets the location the strategy should position bots around
+	 * @param location the location to defend
+	 */
 	public void setDefenceLocation(Vector2 location) {
 		defendingPosition = location;
 		//printToLog(CornerDefenceStrategy.class.getSimpleName() + " - Choosing best corners to defend from...\n");
@@ -56,6 +78,11 @@ public class CornerDefenceStrategy extends Strategy {
 		//printToLog(CornerDefenceStrategy.class.getSimpleName() + " - will defend at " + suitableCorners.size() + " points\n");
 	}
 	
+	/**
+	 * Gets the corner a bot to defend from
+	 * @param bot the bot to find the corner for
+	 * @return null if no corner could be found, otherwise the Corner the bot should hide in
+	 */
 	private Corner getBotCornerPosition(Bot bot) {
 		Corner pos = occupiedCorners.get(bot.getName());
 		if(pos == null) {
@@ -64,6 +91,11 @@ public class CornerDefenceStrategy extends Strategy {
 		return pos;
 	}
 
+	/**
+	 * Finds a suitable corner for the bot
+	 * @param bot the bot to hide
+	 * @return a corner for the bot (null if there was none)
+	 */
 	private Corner findCornerForBot(Bot bot) {
 		for (Corner c : suitableCorners) {
 			if (!occupiedCorners.containsValue(c)) {
@@ -96,6 +128,9 @@ public class CornerDefenceStrategy extends Strategy {
 		}
 	}
 	
+	/**
+	 * Only accepts the Bot class, otherwise it returns false.
+	 */
 	@Override
 	public boolean addUnit(Unit unit) {
 		if(unit!=null) {
