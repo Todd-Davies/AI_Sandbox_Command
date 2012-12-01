@@ -7,6 +7,7 @@ import strategy.CornerDefenceStrategy;
 import strategy.HunterKillerStrategy;
 import strategy.Strategy;
 import units.Bot;
+import units.Squad;
 import units.Unit;
 import analysis.Corner;
 import analysis.CornerAnalysis;
@@ -105,32 +106,48 @@ public class MyCommander extends SandboxCommander
 	}
 	
 	private void organiseBotsIntoUnits() {
-		//Squad s = new Squad(this, "Squad" + units.size(), 2);
+		int numberOfBots = gameInfo.getMyTeamInfo().getMembers().size();
+		Squad s = new Squad(this, "Squad" + units.size(), numberOfBots-1);
 		for(BotInfo bot : gameInfo.botsAvailable()) {
-			/*Bot b = new Bot(this, bot);
+			Bot b = new Bot(this, bot);
 			Unit u = isInUnit(bot);
 			if(u==null) {
-				System.out.println("Added " + bot.getName() + "to " + s.getName());
 				if(!s.add(b)) {
-					units.add(s);
-					s = new Squad(this, "Squad" + units.size(), 2);
-					s.add(b);
+					int uIndex = getIndexOfUnitThatContainsBot(bot);
+					//u.setBot(bot.getName(), bot);
+					if(uIndex<0) {
+						units.add(new Bot(this, bot));
+					} else {
+						Unit unit = units.get(uIndex);
+						unit.setBot(bot.getName(), bot);
+						units.set(uIndex, unit);
+					}
+				} else {
+					System.out.println(bot.getName() + "added to squad");
 				}
 			} else {
-				u.setBot(bot.getName(), bot);
-			}*/
-			int u = getIndexOfUnitThatContainsBot(bot);
+				int uIndex = getIndexOfUnitThatContainsBot(bot);
+				if(u.getClass()==Bot.class) {
+					u.setBot(bot.getName(), bot);
+					units.set(uIndex, u);
+				} else if(u.getClass()==Squad.class) {
+					Squad sq = (Squad) u;
+					sq.setBot(bot.getName(), bot);
+					units.set(uIndex, sq);
+				}
+			}
+			/*int u = getIndexOfUnitThatContainsBot(bot);
 			if(u<0) {
 				units.add(new Bot(this, bot));
 			} else {
 				Unit unit = units.get(u);
 				unit.setBot(bot.getName(), bot);
 				units.set(u, unit);
-			}
+			}*/
 		}
-		/*if(s.getBots().size()>0) {
+		if(s.getBots().size()>0) {
 			units.add(s);
-		}*/
+		}
 	}	
 
 	private Unit isInUnit(BotInfo bot) {

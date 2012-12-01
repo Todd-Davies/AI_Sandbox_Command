@@ -19,7 +19,7 @@ public class HunterKillerStrategy extends Strategy {
 			printToLog(HunterKillerStrategy.class.getSimpleName() + " - " + unit.getName() + " has the flag and is running to base");
 		} else {
 			Vector2 position = getCommander().getLevelInfo().findRandomFreePositionInBox(getCommander().getLevelInfo().getLevelArea());
-			unit.attack(position, "Hunting for enemy", null);
+			unit.attack(position, "Hunting for enemy");
 			printToLog(HunterKillerStrategy.class.getSimpleName() + " - " + unit.getName() + " is attacking position " + (int)position.x + "," + (int)position.y);
 		}
 	}

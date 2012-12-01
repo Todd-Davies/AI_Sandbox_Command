@@ -70,7 +70,7 @@ public class Squad extends Unit {
 	 */
 	@Override
 	public void attack(Vector2 location, String message) {
-		this.attack(location, message, null);
+		attack(location, message, null);
 	}
 	
 	/**
