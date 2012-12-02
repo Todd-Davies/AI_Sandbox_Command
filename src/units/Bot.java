@@ -8,7 +8,9 @@ import com.aisandbox.cmd.cmds.MoveCmd;
 import com.aisandbox.cmd.info.BotInfo;
 import com.aisandbox.util.FacingDirection;
 import com.aisandbox.util.Vector2;
+
 import commander.MyCommander;
+import commander.MyCommanderV1;
 
 /**
  * A wrapper for the BotInfo class that extends the Unit class
@@ -21,11 +23,11 @@ public class Bot extends Unit {
 	
 	/**
 	 * Bot constructor
-	 * @param commander sets the commander that this bot belongs to
+	 * @param myCommander sets the commander that this bot belongs to
 	 * @param bot the BotInfo that this class wraps around
 	 */
-	public Bot(final MyCommander commander, final BotInfo bot) {
-		super(commander, bot.getName());
+	public Bot(final MyCommander myCommander, final BotInfo bot) {
+		super(myCommander, bot.getName());
 		this.setBot(bot);
 	}
 
@@ -49,8 +51,10 @@ public class Bot extends Unit {
 		getCommander().issue(new AttackCmd(getName(), location, facing, message));
 	}
 	
-	public void attack(Vector2 location, String message, FacingDirection facing) {
-		getCommander().issue(new AttackCmd(getName(), location, facing.getDirection(), message));
+	@Override
+	public void attack(List<Vector2> locations, String message, Vector2 facing) {
+		//getCommander().issue(new AttackCmd(getName(), locations, facing, message));
+		getCommander().issue(new AttackCmd(getName(), locations, null, message));		
 	}
 	
 	@Override

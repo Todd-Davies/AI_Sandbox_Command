@@ -39,6 +39,13 @@ public interface UnitInterface {
 	 * @param message the message to display on the in-game map
 	 */
 	public void attack(Vector2 location, String message);
+	/**
+	 * Make a unit attack a set of locations
+	 * @param locations the locations to visit
+	 * @param message the message to display in verbose mode
+	 * @param facing which direction to face
+	 */
+	public void attack(List<Vector2> locations, String message, Vector2 facing);
 	
 	/**
 	 * Make a unit defend a location facing a particular way

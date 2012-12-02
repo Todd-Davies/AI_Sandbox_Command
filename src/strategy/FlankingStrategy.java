@@ -4,8 +4,12 @@ import java.util.ArrayList;
 
 import units.Unit;
 
+import analysis.CornerAnalysis;
+
 import com.aisandbox.util.Vector2;
+
 import commander.MyCommander;
+import commander.MyCommanderV1;
 
 public class FlankingStrategy extends Strategy {
 	
@@ -20,12 +24,12 @@ public class FlankingStrategy extends Strategy {
 	 * @param verbose should this strategy print to the log about what it's doing
 	 * @param flankingDirection which direction to flank (left = false, right = true)
 	 */
-	public FlankingStrategy(MyCommander commander, boolean verbose, final boolean flankingDirection) {
+	/*public FlankingStrategy(MyCommander commander, boolean verbose, final boolean flankingDirection) {
 		super(commander, verbose);
 		direction = flankingDirection;
 		setMaxNumberOfUnits(1, true);
 		waypoints = new ArrayList<Vector2>();
-	}
+	}*/
 	
 	/**
 	 * Constructor for the FlankingStrategy
@@ -55,8 +59,7 @@ public class FlankingStrategy extends Strategy {
         Vector2 left = new Vector2(-d.y, d.x).normalize();
         Vector2 right = new Vector2(d.y, -d.x).normalize();
         //Vector2 front = new Vector2(d.x, d.y).normalize();
-		
-		waypoints.add(startPoint);
+        //waypoints.add(startPoint);
 		if(direction) {
 			waypoints.add(right);
 		} else {
@@ -68,11 +71,21 @@ public class FlankingStrategy extends Strategy {
 
 	@Override
 	public void tick(Unit unit) {
-		if(waypoints.size()==0) { findWaypoints(); }
-		for(Unit u : getUnits()) {
-			//TODO: Check the unit isn't already flanking
-			//TODO: Send move command + log it
+		if(unit.hasFlag()) {
+			Vector2 scoreLocation = getCommander().getLevelInfo().getFlagScoreLocations().get(getCommander().getGameInfo().getTeam());
+			unit.move(scoreLocation, "Running to my base");
+			printToLog(FlankingStrategy.class.getSimpleName() + " - " + unit.getName() + " has the flag and is running to base");
+			return;
 		}
+		if(waypoints.size()==0) { findWaypoints(); }
+		Vector2 pos = unit.getPosition();
+		for(int i=0;i<waypoints.size()-1;i++) {
+			if(CornerAnalysis.isWithinDistance(waypoints.get(i), pos, 10)) {
+				unit.attack(waypoints.get(i+1), "attacking position");
+				return;
+			}
+		}
+		unit.attack(waypoints.get(0), "attacking position");
 	}
 
 	public Vector2 getEndPoint() {
@@ -89,6 +102,11 @@ public class FlankingStrategy extends Strategy {
 
 	public void setStartPoint(Vector2 startPoint) {
 		this.startPoint = startPoint;
+	}
+
+	@Override
+	public Class<?> acceptedUnitType() {
+		return Unit.class;
 	}
 
 }

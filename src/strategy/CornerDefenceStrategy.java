@@ -11,7 +11,9 @@ import analysis.CornerAnalysis;
 import analysis.CornerSorter;
 
 import com.aisandbox.util.Vector2;
+
 import commander.MyCommander;
+import commander.MyCommanderV1;
 
 /**
  * A strategy that defends a location of the map by placing bots in corners around that point to defend it
@@ -26,12 +28,12 @@ public class CornerDefenceStrategy extends Strategy {
 	
 	/**
 	 * CornerDefenceStrategy constructor
-	 * @param commander the commmander that this strategy belongs to
+	 * @param myCommander the commmander that this strategy belongs to
 	 * @param location the location to defend
 	 * @param verbose whether the strategy should print what it's doing to the log
 	 */
-	public CornerDefenceStrategy(MyCommander commander, Vector2 location, boolean verbose) {
-		super(commander, verbose);
+	public CornerDefenceStrategy(MyCommander myCommander, Vector2 location, boolean verbose) {
+		super(myCommander, verbose);
 		occupiedCorners = new HashMap<String, Corner>();
 		setDefenceLocation(location);
 	}
@@ -75,6 +77,9 @@ public class CornerDefenceStrategy extends Strategy {
 			//printToLog("  - " + suitableCorners.get(i).toString() + "\n");
 		}
 		setMaxNumberOfUnits(suitableCorners.size(), true);
+		if(suitableCorners.size()>0) {
+			setMinNumberOfUnits(1);
+		}
 		//printToLog(CornerDefenceStrategy.class.getSimpleName() + " - will defend at " + suitableCorners.size() + " points\n");
 	}
 	
@@ -134,7 +139,7 @@ public class CornerDefenceStrategy extends Strategy {
 	@Override
 	public boolean addUnit(Unit unit) {
 		if(unit!=null) {
-			if(unit.getClass()==Bot.class) {
+			if(unit.getClass()==acceptedUnitType()) {
 				return super.addUnit(unit);
 			} else {
 				return false;
@@ -184,6 +189,11 @@ public class CornerDefenceStrategy extends Strategy {
 				}
 			}
 		}
+	}
+
+	@Override
+	public Class<?> acceptedUnitType() {
+		return Bot.class;
 	}
 
 }

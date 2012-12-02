@@ -1,6 +1,7 @@
 package units;
 
 import commander.MyCommander;
+import commander.MyCommanderV1;
 
 /**
  * Provides the template for interfacable in-game unit types
@@ -14,11 +15,11 @@ public abstract class Unit implements UnitInterface {
 	
 	/**
 	 * Unit constructor
-	 * @param commander the commander that the unit belongs to
+	 * @param myCommander the commander that the unit belongs to
 	 * @param name the name of the unit
 	 */
-	public Unit(final MyCommander commander, final String name) {
-		this.commander = commander;
+	public Unit(final MyCommander myCommander, final String name) {
+		this.commander = myCommander;
 		this.setName(name);
 	}
 

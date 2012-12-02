@@ -7,7 +7,6 @@ import strategy.CornerDefenceStrategy;
 import strategy.HunterKillerStrategy;
 import strategy.Strategy;
 import units.Bot;
-import units.Squad;
 import units.Unit;
 import analysis.Corner;
 import analysis.CornerAnalysis;
@@ -16,63 +15,39 @@ import com.aisandbox.cmd.SandboxCommander;
 import com.aisandbox.cmd.info.BotInfo;
 import com.aisandbox.cmd.info.GameInfo;
 import com.aisandbox.cmd.info.LevelInfo;
+import com.aisandbox.util.Area;
+import com.aisandbox.util.Vector2;
 
+public class MyCommander extends SandboxCommander {
 
-/**
- * Sample "balanced" commander for the AI sandbox.
- * One bot attacking, one defending and the rest randomly searching the level for enemies.
- * 
- * @author Matthias F. Brandstetter
- */
-public class MyCommander extends SandboxCommander
-{
-	
 	List<Unit> units;
 	List<Strategy> strategies;
 	private ArrayList<Corner> corners;
-	//private ArrayList<Corner> suitableCorners;
-	
-	boolean b = false;
 	
 	/**
 	 * Custom commander class construtor.
 	 */
-	public MyCommander()
-	{
+	public MyCommander() {
 		name = "JavaCmd";
 		units = new ArrayList<Unit>();
 		strategies = new ArrayList<Strategy>();
 	}
 	
-	/**
-	 * Called when the server sends the "initialize" message to the commander.
-	 * Use this function to setup your bot before the game starts.
-	 * You can also set this.verbose = true to get more information about each bot visually.
-	 */
+	
 	@Override
-	public void initialize()
-	{
+	public void initialize() {
 		verbose = true;
 		
-		System.out.print("Starting map analysis...\n");
-		System.out.print("DEFENCE ANALYSIS\n");
-		System.out.print(" - Finding corners to defend from...\n");
+		System.out.print("Running map analysis...\n");
 		corners = CornerAnalysis.findCorners(levelInfo.getBlockHeights(), false);
 		System.out.print(" - " + corners.size() + " corners found\n");
 		System.out.print("Finished map analysis...\n");
 	}
 	
-	/**
-	 * Called when the server sends a "tick" message to the commander.
-	 * Override this function for your own bots.  Here you can access all the information in this.gameInfo,
-	 * which includes game information, and this.levelInfo which includes information about the level.
-	 * You can send commands to your bots using the issue() method in this class.
-	 */
 	@Override
-	public void tick()
-	{
-		organiseBotsIntoUnits();
-		organiseUnitsIntoStrategies();
+	public void tick() {
+		setupStrategies();
+		assignBotsToStrategies();
 		for(BotInfo bot : gameInfo.botsAvailable()) {
 			Unit u = isInUnit(bot);
 			if(u!=null) {
@@ -84,72 +59,56 @@ public class MyCommander extends SandboxCommander
 		}
 	}
 	
-	private void organiseUnitsIntoStrategies() {
-		HunterKillerStrategy hunterKiller = new HunterKillerStrategy(this, true);
-		CornerDefenceStrategy flagDefence = new CornerDefenceStrategy(this, gameInfo.getMyFlagInfo().getPosition(), true, 2);
-		for(Unit unit : units) {
-			if(isInStrategy(unit)==null) {
-				if(!flagDefence.addUnit(unit)) { //Try to add the unit to flag defence
-					hunterKiller.addUnit(unit); // Otherwise, have it hunt for enemies
-					System.out.println("Added " + unit.getName() + "to hunterKiller");
-				} else {
-					System.out.println("Added " + unit.getName() + "to cornerDefence");
-				}
-			}
-		}
-		if(hunterKiller.getUnits().size()>0) {
-			strategies.add(hunterKiller);
-		}
-		if(flagDefence.getUnits().size()>0) {
-			strategies.add(flagDefence);
+	private void setupStrategies() {
+		if(strategies.size()<2) {
+			CornerDefenceStrategy baseDefence = new CornerDefenceStrategy(this, gameInfo.getMyFlagInfo().getPosition(), true);
+			strategies.add(baseDefence);
+			HunterKillerStrategy hunters = new HunterKillerStrategy(this, false);
+			strategies.add(hunters);
 		}
 	}
 	
-	private void organiseBotsIntoUnits() {
-		int numberOfBots = gameInfo.getMyTeamInfo().getMembers().size();
-		Squad s = new Squad(this, "Squad" + units.size(), numberOfBots-1);
-		for(BotInfo bot : gameInfo.botsAvailable()) {
-			Bot b = new Bot(this, bot);
+	private void assignBotsToStrategies() {
+		/*TODO: 1. find all bots not in units
+		 * 		2. find all units not in strategies 
+		 * 		3. find all strategies with too few units
+		 * 		4. find what units these strategies want
+		 * 		5. create these units from free bots
+		 * 		6. add these units to the strategies
+		 */
+		List<BotInfo> bots = gameInfo.botsAvailable();
+		for(BotInfo bot : bots) {
 			Unit u = isInUnit(bot);
 			if(u==null) {
-				if(!s.add(b)) {
-					int uIndex = getIndexOfUnitThatContainsBot(bot);
-					//u.setBot(bot.getName(), bot);
-					if(uIndex<0) {
-						units.add(new Bot(this, bot));
-					} else {
-						Unit unit = units.get(uIndex);
-						unit.setBot(bot.getName(), bot);
-						units.set(uIndex, unit);
+				Bot b = new Bot(this, bot);
+				units.add(b);
+				u = isInUnit(bot);
+			}
+			if(isInStrategy(u) != null) {
+				bots.remove(bot);
+			}
+		}
+		for(Strategy s : strategies) {
+			if(s.getClass()==CornerDefenceStrategy.class) {
+				if(bots.size()>0) {
+					BotInfo bot = bots.get(0);
+					Unit u = isInUnit(bot);
+					if(u==null) {
+						Bot b = new Bot(this, bot);
+						units.add(b);
+						u = isInUnit(bot);
 					}
-				} else {
-					System.out.println(bot.getName() + "added to squad");
-				}
-			} else {
-				int uIndex = getIndexOfUnitThatContainsBot(bot);
-				if(u.getClass()==Bot.class) {
-					u.setBot(bot.getName(), bot);
-					units.set(uIndex, u);
-				} else if(u.getClass()==Squad.class) {
-					Squad sq = (Squad) u;
-					sq.setBot(bot.getName(), bot);
-					units.set(uIndex, sq);
+					s.addUnit(isInUnit(bot));
+					if(isInStrategy(u) != null) {
+						bots.remove(bot);
+					}
 				}
 			}
-			/*int u = getIndexOfUnitThatContainsBot(bot);
-			if(u<0) {
-				units.add(new Bot(this, bot));
-			} else {
-				Unit unit = units.get(u);
-				unit.setBot(bot.getName(), bot);
-				units.set(u, unit);
-			}*/
 		}
-		if(s.getBots().size()>0) {
-			units.add(s);
-		}
-	}	
-
+	}
+	
+	
+	
 	private Unit isInUnit(BotInfo bot) {
 		for(Unit unit : units) {
 			if(unit.contains(bot)) {
@@ -201,4 +160,5 @@ public class MyCommander extends SandboxCommander
 	public ArrayList<Corner> getCorners() {
 		return corners;
 	}
+
 }

@@ -73,6 +73,13 @@ public class Squad extends Unit {
 		attack(location, message, null);
 	}
 	
+	@Override
+	public void attack(List<Vector2> locations, String message, Vector2 facing) {
+		for(Bot bot : bots) {
+			bot.attack(locations, message, null);
+		}		
+	}
+	
 	/**
 	 * Makes all the bots in the squad defend a location
 	 */

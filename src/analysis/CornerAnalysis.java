@@ -232,8 +232,7 @@ public class CornerAnalysis {
 	 */
 	public static boolean isWithinDistance(Vector2 p1, Vector2 p2,
 			double maxDistance) {
-		double distance = Math.sqrt(Math.pow(p1.x - p2.x, 2)
-				+ Math.pow(p1.y - p2.y, 2));
+		double distance = Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
 		return (distance < maxDistance);
 	}
 

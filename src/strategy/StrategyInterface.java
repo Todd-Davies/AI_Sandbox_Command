@@ -42,4 +42,9 @@ public interface StrategyInterface {
 	 * @return
 	 */
 	public boolean contains(Unit unit);
+	
+	/**
+	 * The type of unit that this strategy wants
+	 */
+	public Class<?> acceptedUnitType();
 }

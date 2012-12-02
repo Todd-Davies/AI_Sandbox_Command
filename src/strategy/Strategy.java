@@ -16,16 +16,17 @@ public abstract class Strategy implements StrategyInterface {
 	private ArrayList<Unit> units;
 	private MyCommander commander;
 	private int maxNumberOfUnits = 100;
+	private int minNumberOfUnits = 00;
 	private boolean verbose = false;
 	
 	/**
 	 * Strategy constructor
-	 * @param commander the commander that this strategy belongs to
+	 * @param myCommander the commander that this strategy belongs to
 	 * @param verbose should the strategy tell the log what it's doing
 	 */
-	public Strategy(MyCommander commander, boolean verbose) {
+	public Strategy(MyCommander myCommander, boolean verbose) {
 		units = new ArrayList<Unit>();
-		this.commander = commander;
+		this.commander = myCommander;
 		this.verbose = verbose;
 	}
 	
@@ -135,6 +136,21 @@ public abstract class Strategy implements StrategyInterface {
 		}
 	}
 	
+	public int getMinNumberOfUnits() {
+		return minNumberOfUnits;
+	}
+	
+	/**
+	 * Sets the minimum number of units the strategy will support
+	 * @param minNumberOfUnits
+	 * @throws IllegalArgumentException if the minimum > maximum
+	 */
+	public void setMinNumberOfUnits(int minNumberOfUnits) throws IllegalArgumentException {
+		if(minNumberOfUnits>maxNumberOfUnits) throw new IllegalArgumentException("Minimum cannot be larger than maximum");
+		this.minNumberOfUnits = minNumberOfUnits;
+	}
+
+	
 	/**
 	 * Get rid of units if there are too many
 	 */
@@ -144,6 +160,14 @@ public abstract class Strategy implements StrategyInterface {
 				removeUnit(u);
 			}
 		}
+	}
+
+	public boolean isFull() {
+		return (getMaxNumberOfUnits()<=getUnits().size());
+	}
+
+	public boolean needsMoreUnits() {
+		return (getMinNumberOfUnits()>getUnits().size());
 	}
 
 }
