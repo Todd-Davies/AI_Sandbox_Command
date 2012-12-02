@@ -102,5 +102,15 @@ public class Bot extends Unit {
 	public Vector2 getPosition() {
 		return getBot().getPosition();
 	}
+
+	@Override
+	public int getMaxParticipants() {
+		return 1;
+	}
+	
+	@Override
+	public int getMinParticipants() {
+		return 1;
+	}
 	
 }

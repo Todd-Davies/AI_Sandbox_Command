@@ -45,7 +45,7 @@ public abstract class Strategy implements StrategyInterface {
 	 */
 	@Override
 	public boolean addUnit(Unit unit) {
-		if(units.size()<maxNumberOfUnits) {
+		if(units.size()<=maxNumberOfUnits) {
 			return units.add(unit);
 		} else {
 			return false;

@@ -1,7 +1,10 @@
 package commander;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import strategy.CornerDefenceStrategy;
 import strategy.HunterKillerStrategy;
@@ -15,14 +18,14 @@ import com.aisandbox.cmd.SandboxCommander;
 import com.aisandbox.cmd.info.BotInfo;
 import com.aisandbox.cmd.info.GameInfo;
 import com.aisandbox.cmd.info.LevelInfo;
-import com.aisandbox.util.Area;
-import com.aisandbox.util.Vector2;
 
 public class MyCommander extends SandboxCommander {
 
 	List<Unit> units;
 	List<Strategy> strategies;
 	private ArrayList<Corner> corners;
+	//Used to keep any excess units busy
+	private HunterKillerStrategy overflowStrategy;
 	
 	/**
 	 * Custom commander class construtor.
@@ -42,6 +45,7 @@ public class MyCommander extends SandboxCommander {
 		corners = CornerAnalysis.findCorners(levelInfo.getBlockHeights(), false);
 		System.out.print(" - " + corners.size() + " corners found\n");
 		System.out.print("Finished map analysis...\n");
+		overflowStrategy = new HunterKillerStrategy(this, false);
 	}
 	
 	@Override
@@ -60,55 +64,30 @@ public class MyCommander extends SandboxCommander {
 	}
 	
 	private void setupStrategies() {
-		if(strategies.size()<2) {
+		if(strategies.size()<1) {
 			CornerDefenceStrategy baseDefence = new CornerDefenceStrategy(this, gameInfo.getMyFlagInfo().getPosition(), true);
 			strategies.add(baseDefence);
-			HunterKillerStrategy hunters = new HunterKillerStrategy(this, false);
-			strategies.add(hunters);
 		}
 	}
 	
 	private void assignBotsToStrategies() {
-		/*TODO: 1. find all bots not in units
-		 * 		2. find all units not in strategies 
-		 * 		3. find all strategies with too few units
-		 * 		4. find what units these strategies want
-		 * 		5. create these units from free bots
-		 * 		6. add these units to the strategies
-		 */
-		List<BotInfo> bots = gameInfo.botsAvailable();
-		for(BotInfo bot : bots) {
-			Unit u = isInUnit(bot);
-			if(u==null) {
-				Bot b = new Bot(this, bot);
-				units.add(b);
-				u = isInUnit(bot);
-			}
-			if(isInStrategy(u) != null) {
-				bots.remove(bot);
-			}
-		}
-		for(Strategy s : strategies) {
-			if(s.getClass()==CornerDefenceStrategy.class) {
-				if(bots.size()>0) {
-					BotInfo bot = bots.get(0);
-					Unit u = isInUnit(bot);
-					if(u==null) {
-						Bot b = new Bot(this, bot);
-						units.add(b);
-						u = isInUnit(bot);
-					}
-					s.addUnit(isInUnit(bot));
-					if(isInStrategy(u) != null) {
-						bots.remove(bot);
-					}
+		List<BotInfo> botsNotInStrategies = gameInfo.botsAvailable();
+		for(BotInfo b : botsNotInStrategies) {
+			Unit u = isInUnit(b);
+			if(u!=null) {
+				if(isInStrategy(u)==null) {
+					units.remove(u);
+				} else {
+					//This bot is in a strategy
+					botsNotInStrategies.remove(b);
 				}
+			} else {
+				
 			}
 		}
 	}
-	
-	
-	
+
+
 	private Unit isInUnit(BotInfo bot) {
 		for(Unit unit : units) {
 			if(unit.contains(bot)) {
@@ -134,6 +113,9 @@ public class MyCommander extends SandboxCommander {
 			if(strategy.contains(unit)) {
 				return strategy;
 			}
+		}
+		if(overflowStrategy.contains(unit)) {
+			return overflowStrategy;
 		}
 		return null;
 	}

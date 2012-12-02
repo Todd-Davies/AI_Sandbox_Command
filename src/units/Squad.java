@@ -187,4 +187,14 @@ public class Squad extends Unit {
 		return averagePosition;
 	}
 
+	@Override
+	public int getMaxParticipants() {
+		return limit;
+	}
+	
+	@Override
+	public int getMinParticipants() {
+		return 1;
+	}
+
 }

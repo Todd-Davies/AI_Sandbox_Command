@@ -82,4 +82,14 @@ public interface UnitInterface {
 	 * Gets the current position of the unit
 	 */
 	public Vector2 getPosition();
+	
+	/**
+	 * Get the maximum number of bots allowed in this unit
+	 */
+	public int getMaxParticipants();
+	
+	/**
+	 * Get the minumum number of bots allowed in this unit
+	 */
+	public int getMinParticipants();
 }
