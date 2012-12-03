@@ -79,31 +79,25 @@ public class MyCommander extends SandboxCommander {
 	private void assignBotsToStrategies() {
 		List<BotInfo> botPool = new ArrayList<BotInfo>();
 		for(BotInfo b : gameInfo.botsAvailable()) {
+			if(!b.getTeam().equals(gameInfo.getMyTeamInfo().getName())) {
+				break;
+			}
 			Unit u = isInUnit(b);
 			if(u!=null) {
-				if(isInStrategy(u)==null) {
+				if(isInStrategy(u)==null&&!overflowStrategy.contains(u)) {
 					units.remove(u);
 					botPool.add(b);
 				} else {
 					//This bot is in a strategy
+					return;
 				}
-			}
-			botPool.add(b);
-		}
-		
-		
-		ArrayList<Strategy> needsBots = new ArrayList<Strategy>();
-		ArrayList<Strategy> canTakeBots = new ArrayList<Strategy>();
-		for(Strategy s : strategies) {
-			if(s.needsMoreUnits()) {
-				needsBots.add(s);
-			} else if(!s.isFull()) {
-				canTakeBots.add(s);
+			} else {
+				botPool.add(b);
 			}
 		}
 		
 		for(BotInfo b : botPool) {
-			addBotToStrategies(b, needsBots, canTakeBots);
+			addBotToStrategies(b);
 		}
 		
 	}
@@ -114,9 +108,29 @@ public class MyCommander extends SandboxCommander {
 	 * @param preferenceSet the set of strategies that need that bot
 	 * @param takeSet the strategies that'll take the poor dude
 	 */
-	private void addBotToStrategies(BotInfo bot, ArrayList<Strategy> preferenceSet, ArrayList<Strategy> takeSet) {
+	private void addBotToStrategies(BotInfo bot) {
 		Bot b = new Bot(this, bot);
-		for(Strategy s : preferenceSet) {
+		units.add(b);
+		Strategy s = BotAssignment.chooseSuitableStrategy(b, strategies, overflowStrategy);
+		if(s.equals(overflowStrategy)) {
+			if(overflowStrategy.addUnit(b)) {
+				System.out.println("Added " + bot.getName() + " to overflow - " + overflowStrategy.getClass().getSimpleName());
+			}
+		} else {
+			int index = strategies.indexOf(s);
+			s = strategies.get(index);
+			if(s.addUnit(b)) {
+				strategies.set(index, s);
+				System.out.println("Added " + bot.getName() + " to " + s.getClass().getSimpleName());
+			} else {
+				System.out.println("Failed to add " + bot.getName() + " to " + s.getClass().getSimpleName());
+				if(overflowStrategy.addUnit(b)) {
+					System.out.println("Added " + bot.getName() + " to overflow - " + overflowStrategy.getClass().getSimpleName());
+				}
+			}
+		}
+		
+		/*for(Strategy s : preferenceSet) {
 			s = strategies.get(strategies.indexOf(s));
 			if(s.addUnit(b)) {
 				units.add(b);
@@ -137,7 +151,7 @@ public class MyCommander extends SandboxCommander {
 		if(overflowStrategy.addUnit(b)) {
 			units.add(b);
 			System.out.println("Added " + bot.getName() + " to overflow - " + overflowStrategy.getClass().getSimpleName());
-		}
+		}*/
 	}
 
 
