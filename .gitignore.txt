@@ -1,8 +1,10 @@
 *.class
+*.log
 
 # Eclipse rubbish #
 ######################
 *.project
+*.classpath
 */.settings/*
 
 # OS generated files #
