@@ -67,9 +67,6 @@ public class MyCommander extends SandboxCommander {
 		if(strategies.size()<1) {
 			CornerDefenceStrategy baseDefence = new CornerDefenceStrategy(this, gameInfo.getMyFlagInfo().getPosition(), true);
 			strategies.add(baseDefence);
-			HunterKillerStrategy killer = new HunterKillerStrategy(this, false);
-			killer.setMaxNumberOfUnits(2, true);
-			strategies.add(killer);
 		}
 	}
 	

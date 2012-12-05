@@ -123,7 +123,7 @@ public class CornerDefenceStrategy extends Strategy {
 		pos = getBotCornerPosition(bot);
 		if (pos != null) {
 			Vector2 goal = new Vector2(pos.getLocation().x, pos.getLocation().y);
-			if (new Vector2(goal).sub(bot.getBot().getPosition()).length() > 2f) {
+			if (new Vector2(goal).sub(bot.getBot().getPosition()).length() > 1f) {
 				bot.move(getCommander().getLevelInfo().findNearestFreePosition(goal), "Running to defence position");
 				printToLog(CornerDefenceStrategy.class.getSimpleName() + " - " + bot.getName() + " is moving to defend a corner");
 			} else {
